@@ -7,7 +7,7 @@
 #include <vector>
 #include <ctime>
 #include <string>
-#include "map.h"
+#include "map.hpp"
 
 
 const unsigned int WINDOW_WIDTH = 672, WINDOW_HEIGHT = 480;
@@ -45,7 +45,7 @@ public:
         texture(),
         sprite([&] {
             sf::Image image;
-            if (!image.loadFromFile("images/" + fileName)) {
+            if (!image.loadFromFile(fileName)) {
                 std::cerr << "Failed to load snake image\n";
             }
             texture.loadFromImage(image);
@@ -129,12 +129,12 @@ int main() {
         window.setIcon(icon.getSize(), icon.getPixelsPtr());
 
     // player
-    Snake S("snake0.1.png", 10 * 32.0f, 7 * 32.0f, SNAKE_WIDTH, SNAKE_HEIGHT);
+    Snake S("images/snakebody.png", 10 * 32.0f, 7 * 32.0f, SNAKE_WIDTH, SNAKE_HEIGHT);
 
     // map
     sf::Image mapImage;
     sf::Texture mapTexture;
-    if (!mapImage.loadFromFile("images/snakemapv2.png")) {
+    if (!mapImage.loadFromFile("images/snakemap.png")) {
         std::cerr << "Failed to load map image\n";
         return -1;
     }
