@@ -16,11 +16,14 @@ Installed:
 
 1. Clone the project.
 2. Open the root directory of the project and build it.
+
    ```
    cmake -B build
    cmake --build build
    ```
+
 3. Run the program executable named `snake-sfml`. It will be located in `./build/bin/Debug/` directory.
+
    ```
    ./build/bin/Debug/snake-sfml
    ```
