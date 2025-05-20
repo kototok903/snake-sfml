@@ -23,7 +23,7 @@ class Snake {
 public:
     sf::Vector2f head;
     std::vector<sf::Vector2f> snake;
-    int x, y, length;
+    int x, y;
     float w, h;
     float coffeeTime;
     Direction dir;
@@ -83,7 +83,6 @@ public:
 
         if (Map[y][x] == 'f') {
             eat = FRUIT;
-            length++;
             fruitScore++;
             generateTile(1, 'f');
             r = rand() % 10;
@@ -106,7 +105,7 @@ public:
         } else if (Map[y][x] == '0') {
             life = false;
         } else {
-            for (int i = 0; i < length; i++) {
+            for (int i = 0; i < snake.size(); i++) {
                 if (snake[i].x == head.x && snake[i].y == head.y) {
                     life = false;
                     break;
@@ -242,24 +241,31 @@ int main() {
             S.sprite.setTextureRect(sf::IntRect({0, 0}, {32, 32}));
         else
             S.sprite.setTextureRect(sf::IntRect({96, 0}, {32, 32}));
-        S.sprite.setPosition({S.snake[0].x, S.snake[0].y});
+        S.sprite.setPosition(S.snake[0]);
         window.draw(S.sprite);
 
         // body
-        if (S.length > 2) {
+        if (S.snake.size() > 2) {
             S.sprite.setTextureRect(sf::IntRect({32, 0}, {32, 32}));
-            for (int i = 1; i < S.length - 1; i++) {
-                S.sprite.setPosition({S.snake[i].x, S.snake[i].y});
+            for (int i = 1; i < S.snake.size() - 1; i++) {
+                S.sprite.setPosition(S.snake[i]);
                 window.draw(S.sprite);
             }
         }
 
         // tail
-        if (S.length > 1) {
+        if (S.snake.size() > 1) {
             S.sprite.setTextureRect(sf::IntRect({64, 0}, {32, 32}));
-            S.sprite.setPosition({S.snake[S.length - 1].x, S.snake[S.length - 1].y});
+            S.sprite.setPosition(S.snake[S.snake.size() - 1]);
             window.draw(S.sprite);
         }
+        
+        std::cout << "head: " << S.head.x << " " << S.head.y << "\n"; 
+        std::cout << "snake: "; 
+        for (int i = 0; i < S.snake.size(); i++) {
+            std::cout << S.snake[i].x << " " << S.snake[i].y << ", "; 
+        }
+        std::cout << "\n";
 
         // score text
         std::stringstream ss;
