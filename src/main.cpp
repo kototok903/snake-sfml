@@ -9,19 +9,17 @@
 #include <string>
 #include "map.h"
 
+
 const unsigned int WINDOW_WIDTH = 672, WINDOW_HEIGHT = 480;
 const float SNAKE_WIDTH = 32.0f, SNAKE_HEIGHT = 32.0f;
 
-// struct Tile {
-//     float x, y;
-// };
 
 enum Direction { STOP, LEFT, RIGHT, UP, DOWN };
 enum Food { NOTHING, FRUIT };
 
+
 class Snake {
 public:
-    sf::Vector2f head;
     std::vector<sf::Vector2f> snake;
     int x, y;
     float w, h;
@@ -36,7 +34,6 @@ public:
 
     Snake(const std::string& fileName, float X, float Y, float W, float H) 
       : textureFileName(fileName),
-        head{X, Y},
         w(W),
         h(H),
         coffeeTime(0),
@@ -57,28 +54,25 @@ public:
             return s;
         }())
     {
-        snake.push_back(head);
+        snake.push_back({X, Y});
     }
 
 
     void update() {
+        if (!life) return;
+
+        sf::Vector2f newHead = snake[0];
         switch (dir) {
-            case LEFT:  head.x -= speed * 32; break;
-            case RIGHT: head.x += speed * 32; break;
-            case UP:    head.y -= speed * 32; break;
-            case DOWN:  head.y += speed * 32; break;
+            case LEFT:  newHead.x -= speed * 32; break;
+            case RIGHT: newHead.x += speed * 32; break;
+            case UP:    newHead.y -= speed * 32; break;
+            case DOWN:  newHead.y += speed * 32; break;
             default: break;
         }
 
-        interactionWithMap();
-
-        if (!life) speed = 0;
-    }
-
-    void interactionWithMap() {
         srand(static_cast<unsigned>(time(nullptr)));
-        int x = static_cast<int>(head.x) / 32;
-        int y = static_cast<int>(head.y) / 32;
+        int x = static_cast<int>(newHead.x) / 32;
+        int y = static_cast<int>(newHead.y) / 32;
         int r;
 
         if (Map[y][x] == 'f') {
@@ -100,33 +94,31 @@ public:
             Map[y][x] = ' ';
         }
 
-        if (Map[y][x] == ' ') {
-            move();
-        } else if (Map[y][x] == '0') {
-            life = false;
-        } else {
+        if (dir != Direction::STOP) {
             for (int i = 0; i < snake.size(); i++) {
-                if (snake[i].x == head.x && snake[i].y == head.y) {
+                if (snake[i].x == newHead.x && snake[i].y == newHead.y) {
                     life = false;
                     break;
                 }
             }
         }
+
+        if (Map[y][x] == ' ') {
+            move(newHead);
+        } else if (Map[y][x] == '0') {
+            life = false;
+        } 
+
+        if (!life) speed = 0;
     }
 
-    void move() {
-        switch (eat) {
-            case NOTHING:
-                snake.insert(snake.begin(), head);
-                snake.pop_back();
-                break;
-            case FRUIT:
-                snake.insert(snake.begin(), head);
-                break;
-        }
+    void move(const sf::Vector2f &newHead) {
+        snake.insert(snake.begin(), newHead);
+        if (eat != Food::FRUIT) snake.pop_back();
         eat = NOTHING;
     }
 };
+
 
 int main() {
     sf::RenderWindow window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Snake");
@@ -237,12 +229,6 @@ int main() {
 
         // Snake update and draw
         S.update();
-        if (S.life)
-            S.sprite.setTextureRect(sf::IntRect({0, 0}, {32, 32}));
-        else
-            S.sprite.setTextureRect(sf::IntRect({96, 0}, {32, 32}));
-        S.sprite.setPosition(S.snake[0]);
-        window.draw(S.sprite);
 
         // body
         if (S.snake.size() > 2) {
@@ -259,13 +245,21 @@ int main() {
             S.sprite.setPosition(S.snake[S.snake.size() - 1]);
             window.draw(S.sprite);
         }
+
+        // head
+        if (S.life)
+            S.sprite.setTextureRect(sf::IntRect({0, 0}, {32, 32}));
+        else
+            S.sprite.setTextureRect(sf::IntRect({96, 0}, {32, 32}));
+        S.sprite.setPosition(S.snake[0]);
+        window.draw(S.sprite);
         
-        std::cout << "head: " << S.head.x << " " << S.head.y << "\n"; 
-        std::cout << "snake: "; 
-        for (int i = 0; i < S.snake.size(); i++) {
-            std::cout << S.snake[i].x << " " << S.snake[i].y << ", "; 
-        }
-        std::cout << "\n";
+        // DEBUG
+        // std::cout << "snake: "; 
+        // for (int i = 0; i < S.snake.size(); i++) {
+        //     std::cout << S.snake[i].x << " " << S.snake[i].y << ", "; 
+        // }
+        // std::cout << "\n";
 
         // score text
         std::stringstream ss;
